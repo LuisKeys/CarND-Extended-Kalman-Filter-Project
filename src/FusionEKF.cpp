@@ -94,7 +94,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -107,7 +106,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
       ekf_.x_ << px, py, 
                 0, 0;
-      ekf_.timestamp_ = measurement_pack.raw_measurements_[3];
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -115,7 +113,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       */
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 
                 0, 0;
-      ekf_.timestamp_ = measurement_pack.raw_measurements_[2];
     }
 
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -124,15 +121,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     return;
   }
 
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    ekf_.timestamp_ = measurement_pack.raw_measurements_[3];
-  }
-  else {
-    ekf_.timestamp_ = measurement_pack.raw_measurements_[2];
-  }
-
-  ekf_.dt_ = ((float)(ekf_.timestamp_ - previous_timestamp_)) / 1000000.0; //dt - expressed in seconds
-  previous_timestamp_ = ekf_.timestamp_;
+  ekf_.dt_ = ((float)(measurement_pack.timestamp_ - previous_timestamp_)) / 1000000.0; //dt - expressed in seconds
+  previous_timestamp_ = measurement_pack.timestamp_;
 
   /*****************************************************************************
    *  Prediction
@@ -200,16 +190,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     VectorXd z = VectorXd(2);
     z << measurement_pack.raw_measurements_[0], 
          measurement_pack.raw_measurements_[1];
-
+    ekf_.H_ = Hj_;
     ekf_.UpdateEKF(z);
   } else {
     // Laser updates
+    ekf_.H_ = H_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output
-  cout << "dt_ = " << ekf_.dt_ << endl;
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout <<  endl;
+  //cout << "x_ = " << ekf_.x_ << endl;
   //cout << "P_ = " << ekf_.P_ << endl;
 }
