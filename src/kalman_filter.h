@@ -23,6 +23,8 @@ public:
   // measurement covariance matrix
   Eigen::MatrixXd R_;
 
+  float dt_;
+  long timestamp_;
   /**
    * Constructor
    */
