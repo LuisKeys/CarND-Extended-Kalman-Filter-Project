@@ -55,6 +55,7 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
+
   /**
   TODO:
     * update the state by using Extended Kalman Filter equations
@@ -72,8 +73,14 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   VectorXd transf_x = VectorXd(3);
 
+
+
+
   float ro = sqrt( px * px + py * py );
   transf_x << ro, atan2( py, px ), ( px * vx + py * vy ) / ro;
+
+  cout << "Test 1 R " << ro << endl;
+  cout << "Test 1 R " << transf_x << endl;
 
   // Update the state using EKF
   VectorXd y = z - transf_x;
@@ -92,4 +99,5 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   // Compute new state
   x_ = x_ + (K * y);
   P_ = (I_ - K * H_) * P_;
+
 }
