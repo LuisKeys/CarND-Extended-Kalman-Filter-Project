@@ -69,6 +69,19 @@ public:
    */
   void UpdateEKF(const Eigen::VectorXd &z);
 
+  /**
+   * Common code for both updates methods
+   * @param y The diff beween meassure and state
+   * @param K 
+   */
+  void UpdateCommon(const Eigen::VectorXd &y, const Eigen::MatrixXd &K);
+
+  /**
+   * Angle normalization
+   * @param phi Any angle to be normalized
+   */
+  void NormalizeAngle(double &phi);
+
 private:
 
   //Tools Class

@@ -145,8 +145,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
 
-  float noise_ax = 9;
-  float noise_ay = 9;
+  const float noise_ax = 9;
+  const float noise_ay = 9;
 
   ekf_.F_(0, 2) = ekf_.dt_;
   ekf_.F_(1, 3) = ekf_.dt_;

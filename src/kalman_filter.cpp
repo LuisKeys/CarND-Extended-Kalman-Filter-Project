@@ -49,9 +49,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
-  //new estimate
-  x_ = x_ + (K * y);
-  P_ = (I_ - K * H_) * P_;
+  UpdateCommon(y, K);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -66,38 +64,39 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vy = x_[3];
 
   // If rho near 0, skip the update step to avoid dividing by zero.
-  if( px < 0.0001 && py < 0.0001 )
+  if (abs(px) < 0.0001 && abs(py) < 0.0001)
     return;
 
   H_ = tools.CalculateJacobian( x_ );
 
   VectorXd transf_x = VectorXd(3);
 
-
-
-
   float ro = sqrt( px * px + py * py );
   transf_x << ro, atan2( py, px ), ( px * vx + py * vy ) / ro;
-
-  cout << "Test 1 R " << ro << endl;
-  cout << "Test 1 R " << transf_x << endl;
 
   // Update the state using EKF
   VectorXd y = z - transf_x;
 
-  if( y[1] > PI )
-    y[1] -= 2.0f * PI;
-
-  if( y[1] < -PI )
-    y[1] += 2.0f * PI;
+  NormalizeAngle(y[1]);
 
   MatrixXd Hjt = H_.transpose();
   MatrixXd S = H_* P_* Hjt + R_;
   MatrixXd Si = S.inverse();
   MatrixXd K =  P_ * Hjt * Si;
 
-  // Compute new state
-  x_ = x_ + (K * y);
-  P_ = (I_ - K * H_) * P_;
+  UpdateCommon(y, K);
+}
 
+void KalmanFilter::NormalizeAngle(double &phi)
+{
+ if( phi > PI )
+    phi -= 2.0f * PI;
+
+  if( phi < -PI )
+    phi += 2.0f * PI;
+}
+
+void KalmanFilter::UpdateCommon(const VectorXd &y, const MatrixXd &K) {
+  x_ += K * y;
+  P_ -= K * H_ * P_;
 }
